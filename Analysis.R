@@ -1,6 +1,8 @@
 library(tseries)
 library(xts)
 library(readxl)
+
+#sta
 s_date<-"1990-01-02"
 e_date<-"2009-12-31"
 
