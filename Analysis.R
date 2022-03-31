@@ -2,7 +2,7 @@ library(tseries)
 library(xts)
 library(readxl)
 
-#sta
+#start and end date
 s_date<-"1990-01-02"
 e_date<-"2009-12-31"
 
@@ -29,5 +29,5 @@ length(vix_f22)
 model_f22<-lm(sp500_sd_f22~vix_f22)
 summary(model_f22)
 plot_f22<- cbind(coredata(vix_f22),(coredata(sp500_sd_f22)))
-plot_f22(plot_f22)
+plot(plot_f22)
 abline(model_f22)
