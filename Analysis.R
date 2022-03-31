@@ -26,9 +26,12 @@ vix_f22<-(vix[2:5021])
 length(sp500_sd_f22) 
 length(vix_f22)
 
-#plotting the f_22 model
+#f_22 model
 model_f22<-lm(sp500_sd_f22~vix_f22)
 summary(model_f22)
 plot_f22<- cbind(coredata(vix_f22),(coredata(sp500_sd_f22)))
 plot(plot_f22)
 abline(model_f22)
+cor_f22<-cor(coredata(vix_f22),(coredata(sp500_sd_f22)))
+
+    
