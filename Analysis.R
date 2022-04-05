@@ -12,7 +12,7 @@ f_model<-function(d) {
   sp500_lr<-na.omit(diff(log(sp500))) 
   #vix data
   vix<-as.xts(get.hist.quote("^VIX", start = s_date, end = e_date, quote = "Close", provider = "yahoo", retclass = "zoo"))
-  # sp500 future 22 day volatility as historical volatility lagged backward of 22 days
+  # sp500 future 22 day volatility as historical volatility lagged backward of d days
   sp500_sd_f<-na.omit(
     lag.xts(
       rollapply(sp500_lr, width = d, FUN = sd),
@@ -24,10 +24,12 @@ f_model<-function(d) {
   
   model<-lm(sp500_sd_f~vix_f)
   plott<- cbind(coredata(vix_f),(coredata(sp500_sd_f)))
-  cor<-cor(coredata(vix_f),(coredata(sp500_sd_f)))
-  model
+  correl<-cor(coredata(vix_f),(coredata(sp500_sd_f)))
+
+  return(list(summary(model), correl, plot(plott), abline(model)))
+  
 }
-f_model(d=22)
+
 
 
 #sp500 data
