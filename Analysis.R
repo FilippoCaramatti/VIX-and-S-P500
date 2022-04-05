@@ -65,15 +65,6 @@ h_model<-function(d) {
 
 
 
-
-
-
-
-
------------------------------------------------------
-
-
-
 #sp500 data
 sp500<-as.xts(get.hist.quote("^GSPC", start = s_date, end = e_date, quote = "Close", provider = "yahoo", retclass = "zoo"))
 sp500_lr<-na.omit(diff(log(sp500))) 
