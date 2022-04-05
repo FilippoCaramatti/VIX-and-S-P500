@@ -39,6 +39,39 @@ f_model(d=11)
 f_model(d=5)
 
 
+h_model<-function(d) {
+  #sp500 data
+  sp500<-as.xts(get.hist.quote("^GSPC", start = s_date, end = e_date, quote = "Close", provider = "yahoo", retclass = "zoo"))
+  sp500_lr<-na.omit(diff(log(sp500))) 
+  #vix data
+  vix<-as.xts(get.hist.quote("^VIX", start = s_date, end = e_date, quote = "Close", provider = "yahoo", retclass = "zoo"))
+  # sp500 future d day volatility as historical volatility lagged backward of d days
+  sp500_sd_h<-na.omit(
+    rollapply(sp500_lr, width = d, FUN = sd)
+  )*sqrt(252)*100
+  
+  n<-length(vix)
+  vix_h<-(vix[(2+(d-1)):n])
+  model<-lm(sp500_sd_h~vix_h)
+  plott<- cbind(coredata(vix_h),(coredata(sp500_sd_h)))
+  correl<-cor(coredata(vix_h),(coredata(sp500_sd_h)))
+  
+  return(list(summary(model), correl, plot(plott), abline(model)))
+}
+
+#------------------------------------------------------#
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------
+
 
 
 #sp500 data
