@@ -30,6 +30,15 @@ f_model<-function(d) {
   
 }
 
+f_model(d=66)
+f_model(d=55)
+f_model(d=44)
+f_model(d=33)
+f_model(d=22)
+f_model(d=11)
+f_model(d=5)
+
+
 
 
 #sp500 data
