@@ -126,7 +126,7 @@ plot_ly(
   name = "Correlation"
 )%>% 
   add_trace(y = ~r_squareds_f, name = "R^2")%>% 
-  layout(legend = list(x = 0.8, y = 1), yaxis = list(title="Correlation", zeroline=F),xaxis = list(title="Days" ,zeroline=F))
+  layout(legend = list(x = 0.8, y = 1), title="Future volatility model", yaxis = list(title="Correlation", zeroline=F),xaxis = list(title="Days" ,zeroline=F))
 
 
 
@@ -191,7 +191,7 @@ r_corr_h<-data.frame(
   r_squareds_h
 )
 
-plot_ly(
+a<-plot_ly(
   r_corr_h, 
   x =c(5,11,22,33,44,55,66),
   y = ~correlations_h,
@@ -203,7 +203,7 @@ plot_ly(
   layout(legend = list(x = 0.8, y = 1), yaxis = list(title="Correlation", zeroline=F),xaxis = list(title="Days" ,zeroline=F))
 
 
-
+orca(a, "plot.svg")
 
 #------------------------------------------------------#
 #sp500 data
