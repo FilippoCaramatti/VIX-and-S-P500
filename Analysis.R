@@ -67,9 +67,15 @@ f_model <- function(d) {
     sp500_coredata
   )
   
-  fig <- plot_ly(xy, x = ~vix_coredata, y = ~sp500_coredata, type = 'scatter', alpha = 0.65, mode = 'markers', name = 'VIX, annualized SP500 future volatility') %>%
-    add_trace(x = ~vix_coredata, y = fitted(model), name = 'Regression Fit', mode = 'lines', alpha = 1) %>%
-    layout(legend = list(x = 0, y = 1), yaxis = list(title="S&P500 annualized future volatility (22d)", zeroline=F),xaxis = list(title="VIX" ,zeroline=F))
+  fig <- ggplot(xy, aes(x=vix_coredata, y=sp500_coredata))+
+    geom_point(shape=20, size=3, alpha = 1/10, aes(color="VIX, S&P500 Future volatility 22d"))+
+    theme_classic()+
+    geom_smooth(method = "lm", se=F, size=1, aes(color="Regression line"))+
+    labs(x="VIX", y="S&P500 forward volatility 22d")+
+    scale_y_continuous(breaks = seq(10, 90, by = 10))+
+    scale_x_continuous(breaks = seq(10, 80, by = 10))+
+    scale_colour_manual(values = legend)+
+    theme(panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "#EAEAEA"), legend.position = c(0.25,0.9), legend.title=element_blank())
   fig
 
   return(
@@ -81,7 +87,6 @@ f_model <- function(d) {
   )
 
 }
-
 
 correlations_f <- c(
   f_model(d=5)[[2]],
