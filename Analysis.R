@@ -58,35 +58,45 @@ f_model <- function(d) {
     coredata(sp500_sd_f)
   )
   
+  #vix and vola graph
+  legend_1 <- c("S&P500 future 22d vaolatility"="#DC3912", "VIX"="#3366CC")
+  fig_1 <- ggplot(sp500_sd_f, aes(x=index(sp500_sd_f), y=coredata(sp500_sd_f)))+
+    geom_line(aes(color="S&P500 future 22d vaolatility"), lwd=0.7)+
+    geom_line(aes(x=index(sp500_sd_f), y=coredata(vix_f), color="VIX"), lwd=0.7)+
+    scale_colour_manual(values = legend_1)+
+    theme_classic()+
+    theme(panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "#EAEAEA"), legend.position = c(0.25,0.9), legend.title=element_blank())+
+    labs(x="Data", y="Annualized volatility")
+  
+  
   #graph of the model
   vix_coredata <- c(coredata(vix_f))
-  sp500_coredata <- c(coredata(sp500_sd_f))
-  
-  xy <- data.frame(
-    vix_coredata,
-    sp500_coredata
-  )
-  
-  fig <- ggplot(xy, aes(x=vix_coredata, y=sp500_coredata))+
+  sp500_coredata <- c(coredata(sp500_sd_f))  
+  xy_2 <- data.frame(vix_coredata, sp500_coredata)
+  legend_2<-c("VIX, S&P500 Future volatility 22d"="#1e76b4","Regression line"="#ff8921")
+  fig_2 <- ggplot(xy_2, aes(x=vix_coredata, y=sp500_coredata))+
     geom_point(shape=20, size=3, alpha = 1/10, aes(color="VIX, S&P500 Future volatility 22d"))+
     theme_classic()+
     geom_smooth(method = "lm", se=F, size=1, aes(color="Regression line"))+
     labs(x="VIX", y="S&P500 forward volatility 22d")+
     scale_y_continuous(breaks = seq(10, 90, by = 10))+
     scale_x_continuous(breaks = seq(10, 80, by = 10))+
-    scale_colour_manual(values = legend)+
+    scale_colour_manual(values = legend_2)+
     theme(panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "#EAEAEA"), legend.position = c(0.25,0.9), legend.title=element_blank())
-  fig
+  
 
   return(
     list(
       summary(model), 
       correl, 
-      fig
+      fig_1,
+      fig_2
     )
   )
 
 }
+
+f_model(d=22)
 
 correlations_f <- c(
   f_model(d=5)[[2]],
