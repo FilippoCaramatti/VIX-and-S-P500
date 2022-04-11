@@ -45,12 +45,12 @@ f_model <- function(d) {
   
   
   #graph of the model_f
-  vix_coredata <- c(coredata(vix_f))
-  sp500_coredata <- c(coredata(sp500_sd_f))  
-  xy_2 <- data.frame(vix_coredata, sp500_coredata)
+  xy_f <- data.frame(coredata(vix_f), coredata(sp500_sd_f))
+  
   legend_2<-c("VIX, S&P500 Future volatility 22d"="#1e76b4",
               "Regression line"="#ff8921")
-  fig_2 <- ggplot(xy_2, aes(x=vix_coredata, y=sp500_coredata))+
+  
+  fig_2 <- ggplot(xy_f, aes(x=coredata(vix_f), y=coredata(sp500_sd_f)))+
     geom_point(shape=20, size=3, alpha = 1/10, 
                aes(color="VIX, S&P500 Future volatility 22d"))+
     theme_classic()+
@@ -91,7 +91,7 @@ r_squareds_f <- c(
   f_model(d=66)[[1]]$r.squared
   )
 
-r_corr<-data.frame(
+r_corr_f<-data.frame(
   row.names=c(
     "Forward 5 days",
     "Forward 11 days",
@@ -105,12 +105,12 @@ r_corr<-data.frame(
   r_squareds_f
 )
 
-ggplot(r_corr)+
-  geom_line(aes(color="Correlation", y=r_corr$correlations_f,
+ggplot(r_corr_f)+
+  geom_line(aes(color="Correlation", y=r_corr_f$correlations_f,
                 x=c(5,11,22,33,44,55,66)))+
-  geom_line(aes(color="R^2", y=r_corr$r_squareds_f, x=c(5,11,22,33,44,55,66)))+
+  geom_line(aes(color="R^2", y=r_corr_f$r_squareds_f, x=c(5,11,22,33,44,55,66)))+
   scale_x_continuous(breaks=c(5,11,22,33,44,55,66))+
-  scale_y_continuous(breaks = seq(0.5, 0.9, by = 0.05))+
+  scale_y_continuous(limits = c(0.35, 0.85), breaks = seq(0.35, 0.85, by = 0.05))+
   ylab( expression(paste( R^{2},", correlation")))+
   xlab("Days in the volatility calculation")+
   theme_classic()+
@@ -120,22 +120,49 @@ ggplot(r_corr)+
 
 
 
-
 h_model<-function(d) {
   
   # sp500 historical d day volatility as historical volatility lagged backward of d days
-  sp500_sd_h <- na.omit(
-    rollapply(sp500_lr, width = d, FUN = sd)
-  )*sqrt(252)*100
-
-  n <- length(vix)
-  vix_h <- (vix[(2+(d-1)):n])
-  model <- lm(sp500_sd_h~vix_h)
-  plott <- cbind(coredata(vix_h),(coredata(sp500_sd_h)))
-  correl <- cor(coredata(vix_h),(coredata(sp500_sd_h)))
-
-  return(list(summary(model), correl, plot(plott), abline(model)))
+  sp500_sd_h <- na.omit(rollapply(sp500_lr, width = d, FUN = sd))*sqrt(252)*100
+  
+  vix_h <- (vix[(2+(d-1)):n_vix])
+  
+  #vix and vola graph
+  fig_1 <- ggplot(sp500_sd_h, aes(x=index(sp500_sd_h), y=coredata(sp500_sd_h)))+
+    geom_line(aes(color="S&P500 Historical 22d vaolatility"))+
+    geom_line(aes(x=index(sp500_sd_h), y=coredata(vix_h), color="VIX"))+
+    theme_classic()+
+    theme(panel.grid.major = element_line(size = 0.5, linetype = 'solid', 
+                                          colour = "#EAEAEA"), 
+          legend.position = c(0.25,0.9), legend.title=element_blank())+
+    labs(x="Data", y="Annualized volatility")
+  
+  model_h <- lm(sp500_sd_h~vix_h)
+  
+  #graph of the model_f
+  xy_h <- data.frame(coredata(vix_h), coredata(sp500_sd_h))
+  legend_2<-c("VIX, S&P500 Historical volatility 22d"="#1e76b4",
+              "Regression line"="#ff8921")
+  fig_2 <- ggplot(xy_h, aes(x=coredata(vix_h), y=coredata(sp500_sd_h)))+
+    geom_point(shape=20, size=3, alpha = 1/10, 
+               aes(color="VIX, S&P500 Historical volatility 22d"))+
+    theme_classic()+
+    geom_smooth(method = "lm", se=F, size=1, aes(color="Regression line"))+
+    labs(x="VIX", y="S&P500 forward volatility 22d")+
+    scale_y_continuous(breaks = seq(10, 90, by = 10))+
+    scale_x_continuous(breaks = seq(10, 80, by = 10))+
+    scale_colour_manual(values = legend_2)+
+    theme(panel.grid.major = element_line(size = 0.5, linetype = 'solid', 
+                                          colour = "#EAEAEA"),
+          legend.position = c(0.25,0.9), legend.title=element_blank())
+  
+  correl_h <- cor(coredata(vix_h),(coredata(sp500_sd_h)))
+  
+  return(list(summary(model_h), correl_h, fig_1, fig_2))
+  
 }
+
+h_model(d=22)
 
 correlations_h <- c(
   h_model(d=5)[[2]],
@@ -171,65 +198,23 @@ r_corr_h<-data.frame(
   r_squareds_h
 )
 
-a<-plot_ly(
-  r_corr_h, 
-  x =c(5,11,22,33,44,55,66),
-  y = ~correlations_h,
-  type = 'scatter',
-  mode ="lines",
-  name = "Correlation"
-)%>% 
-  add_trace(y = ~r_squareds_h, name = "R^2")%>% 
-  layout(legend = list(x = 0.8, y = 1), yaxis = list(title="Correlation", zeroline=F),xaxis = list(title="Days" ,zeroline=F))
+legend <- c("Correlation Historical model"="red1", "R^2 Historical model"="royalblue1",
+            "Correlation Future model"="red4", "R^2 Future model"="royalblue4")
 
-
-orca(a, "plot.svg")
-
-#------------------------------------------------------#
-#sp500 data
-sp500 <- as.xts(
-  get.hist.quote(
-    "^GSPC",
-    start = s_date,
-    end = e_date,
-    quote = "Close",
-    provider = "yahoo",
-    retclass = "zoo"
-  )
-)
-sp500_lr <- na.omit(
-  diff(
-    log(sp500)
-  )
-)
-#vix data
-vix <- as.xts(
-  get.hist.quote(
-    "^VIX",
-    start = s_date,
-    end = e_date,
-    quote = "Close",
-    provider = "yahoo",
-    retclass = "zoo"
-  )
-)
-# sp500 future 22 day volatility as historical volatility lagged backward of d days
-sp500_sd_f <- na.omit(
-  lag.xts(
-    rollapply(
-      sp500_lr,
-      width = 22,
-      FUN = sd
-    ),
-    k = - (22-1)
-  )
-)*sqrt(252)*100
-
-n <- length(vix)
-vix_f <- (vix[2:(n-(22-1))])
-
-model <- lm(sp500_sd_f~vix_f)
-
-
-
+ggplot(r_corr_h)+
+  geom_line(aes(color="Correlation Historical model", y=r_corr_h$correlations_h,
+                x=c(5,11,22,33,44,55,66)))+
+  geom_line(aes(color="R^2 Historical model", y=r_corr_h$r_squareds_h,
+                x=c(5,11,22,33,44,55,66)))+
+  geom_line(aes(color="Correlation Future model", y=r_corr_f$correlations_f,
+                x=c(5,11,22,33,44,55,66)),)+
+  geom_line(aes(color="R^2 Future model", y=r_corr_f$r_squareds_f, x=c(5,11,22,33,44,55,66)))+
+  scale_x_continuous(breaks=c(5,11,22,33,44,55,66))+
+  scale_y_continuous(limits = c(0.35, 0.95), breaks = seq(0.35, 0.95, by = 0.05))+
+  ylab( expression(paste( R^{2},", correlation")))+
+  xlab("Days in the volatility calculation")+
+  theme_classic()+
+  theme(panel.grid.major = element_line(size = 0.5, colour = "#EAEAEA"), 
+        legend.position = c(0.8,0.9), legend.title=element_blank())+
+  scale_color_manual(values = legend)
 
