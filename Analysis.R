@@ -9,25 +9,27 @@ library(ggplot2)
 s_date <- "1990-01-02"
 e_date <- "2022-04-10"
 
-f_model <- function(d) {
-  #sp500 data
-  sp500 <- as.xts(get.hist.quote("^GSPC", start = s_date, end = e_date, 
-                                 quote = "Close", provider = "yahoo", 
-                                 retclass = "zoo"))
-  sp500_lr <- na.omit(diff(log(sp500)))
-  
-  #vix data
-  vix <- as.xts(get.hist.quote("^VIX", start = s_date, end = e_date, 
+#sp500 data
+sp500 <- as.xts(get.hist.quote("^GSPC", start = s_date, end = e_date, 
                                quote = "Close", provider = "yahoo", 
                                retclass = "zoo"))
+sp500_lr <- na.omit(diff(log(sp500)))
+
+#vix data
+vix <- as.xts(get.hist.quote("^VIX", start = s_date, end = e_date, 
+                             quote = "Close", provider = "yahoo", 
+                             retclass = "zoo"))
+n_vix <- length(vix)
+
+
+f_model <- function(d) {
   # sp500 future 22 day volatility as historical volatility lagged backward of d days
   sp500_sd_f <- na.omit(lag.xts(rollapply(sp500_lr, width = d, FUN = sd), 
                                 k = - (d-1)))*sqrt(252)*100
 
-  n <- length(vix)
-  vix_f <- (vix[2:(n-(d-1))])
+  vix_f <- (vix[2:(n_vix-(d-1))])
 
-  model <- lm(sp500_sd_f~vix_f)
+  model_f <- lm(sp500_sd_f~vix_f)
 
   correl <- cor(coredata(vix_f), coredata(sp500_sd_f))
   
@@ -42,7 +44,7 @@ f_model <- function(d) {
     labs(x="Data", y="Annualized volatility")
   
   
-  #graph of the model
+  #graph of the model_f
   vix_coredata <- c(coredata(vix_f))
   sp500_coredata <- c(coredata(sp500_sd_f))  
   xy_2 <- data.frame(vix_coredata, sp500_coredata)
@@ -62,7 +64,7 @@ f_model <- function(d) {
           legend.position = c(0.25,0.9), legend.title=element_blank())
   
 
-  return(list(summary(model), correl, fig_1, fig_2))
+  return(list(summary(model_f), correl, fig_1, fig_2))
 }
 
 f_model(d=22)
@@ -119,22 +121,9 @@ ggplot(r_corr)+
 
 
 
-
-
-
-
-
-
-
-
-
 h_model<-function(d) {
-  #sp500 data
-  sp500 <- as.xts(get.hist.quote("^GSPC", start = s_date, end = e_date, quote = "Close", provider = "yahoo", retclass = "zoo"))
-  sp500_lr <- na.omit(diff(log(sp500)))
-  #vix data
-  vix <- as.xts(get.hist.quote("^VIX", start = s_date, end = e_date, quote = "Close", provider = "yahoo", retclass = "zoo"))
-  # sp500 future d day volatility as historical volatility lagged backward of d days
+  
+  # sp500 historical d day volatility as historical volatility lagged backward of d days
   sp500_sd_h <- na.omit(
     rollapply(sp500_lr, width = d, FUN = sd)
   )*sqrt(252)*100
