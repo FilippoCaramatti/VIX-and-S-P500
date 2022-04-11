@@ -7,7 +7,7 @@ library(ggplot2)
 
 #start and end date
 s_date <- "1990-01-02"
-e_date <- "2009-12-31"
+e_date <- "2022-04-10"
 
 f_model <- function(d) {
   #sp500 data
@@ -67,6 +67,8 @@ f_model <- function(d) {
 
 f_model(d=22)
 
+
+
 correlations_f <- c(
   f_model(d=5)[[2]],
   f_model(d=11)[[2]],
@@ -114,7 +116,9 @@ ggplot(r_corr)+
                                         colour = "#EAEAEA"), 
         legend.position = c(0.9,0.9), legend.title=element_blank())
 
-  
+
+
+
 
 
 
