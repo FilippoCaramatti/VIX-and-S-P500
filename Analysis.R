@@ -3,7 +3,9 @@ library(xts)
 library(readxl)
 library(plotly)
 library(ggplot2)
-library(strucchange)
+
+library(lmtest)
+library(MuMIn)
 
 
 #start and end date
@@ -22,17 +24,39 @@ vix <- as.xts(get.hist.quote("^VIX", start = s_date, end = e_date,
                              retclass = "zoo"))
 n_vix <- length(vix)
 
+#linear model tests fir f22d
+d=22
+sp500_sd_f <- na.omit(lag.xts(rollapply(sp500_lr, width = d, FUN = sd), 
+                              k = - (d-1)))*sqrt(252)*100
+vix_f <- (vix[2:(n_vix-(d-1))])
+model_test1
+resettest(sp500_sd_f~vix_f, power = 2:6 , type = "regressor")
+
+#transformation of vix
+vix_2 = vix_f^2
+vix_3 = vix_f^3
+vix_4 = vix_f^4
+vix_5 = vix_f^5
+vix_6 = vix_f^6
+vix_ln =log(vix_f)
+vix_sqrt = sqrt(vix_f)
+vix_1ov = 1/vix_f
+
+options(na.action = "na.fail")
+model_test <- lm(sp500_sd_f~vix_f+vix_2+vix_3+vix_4+vix_5+vix_6+vix_ln+vix_sqrt+vix_1ov)
+ dredge(model_test, evaluate = T, rank = "AIC", extra = "adjR^2")
+write.csv(dre, file="dredge.csv")
+
 
 f_model <- function(d) {
   # sp500 future 22 day volatility as historical volatility lagged backward of d days
   sp500_sd_f <- na.omit(lag.xts(rollapply(sp500_lr, width = d, FUN = sd), 
                                 k = - (d-1)))*sqrt(252)*100
-
+  
   vix_f <- (vix[2:(n_vix-(d-1))])
-
+  
   model_f <- lm(sp500_sd_f~vix_f)
-  chow <- sctest(sp500_sd_f~vix_f, type = "Chow")
-
+  
   correl <- cor(coredata(vix_f), coredata(sp500_sd_f))
   
   #vix and vola graph
@@ -53,7 +77,7 @@ f_model <- function(d) {
               "Regression line"="#ff8921")
   
   fig_2 <- ggplot(xy_f, aes(x=coredata(vix_f), y=coredata(sp500_sd_f)))+
-    geom_point(shape=20, size=3, alpha = 1/10, 
+    geom_point(shape=20, size=2, alpha = 1/10, 
                aes(color="VIX, S&P500 Future volatility 22d"))+
     theme_classic()+
     geom_smooth(method = "lm", se=F, size=1, aes(color="Regression line"))+
@@ -65,7 +89,7 @@ f_model <- function(d) {
                                           colour = "#EAEAEA"),
           legend.position = c(0.25,0.9), legend.title=element_blank())
   
-
+  
   return(list(summary(model_f), correl, fig_1, fig_2))
 }
 
@@ -91,7 +115,7 @@ r_squareds_f <- c(
   f_model(d=44)[[1]]$r.squared,
   f_model(d=55)[[1]]$r.squared,
   f_model(d=66)[[1]]$r.squared
-  )
+)
 
 r_corr_f<-data.frame(
   row.names=c(
@@ -102,7 +126,7 @@ r_corr_f<-data.frame(
     "Forward 44 days",
     "Forward 55 days",
     "Forward 66 days"
-    ), 
+  ), 
   correlations_f,
   r_squareds_f
 )
@@ -219,4 +243,3 @@ ggplot(r_corr_h)+
   theme(panel.grid.major = element_line(size = 0.5, colour = "#EAEAEA"), 
         legend.position = c(0.8,0.9), legend.title=element_blank())+
   scale_color_manual(values = legend)
-
