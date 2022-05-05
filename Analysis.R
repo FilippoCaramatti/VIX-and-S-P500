@@ -3,6 +3,7 @@ library(xts)
 library(readxl)
 library(plotly)
 library(ggplot2)
+library(strucchange)
 
 
 #start and end date
@@ -30,6 +31,7 @@ f_model <- function(d) {
   vix_f <- (vix[2:(n_vix-(d-1))])
 
   model_f <- lm(sp500_sd_f~vix_f)
+  chow <- sctest(sp500_sd_f~vix_f, type = "Chow")
 
   correl <- cor(coredata(vix_f), coredata(sp500_sd_f))
   
