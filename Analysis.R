@@ -240,12 +240,10 @@ ggplot(r_corr_h)+
                 x=c(5,11,22,33,44,55,66)),)+
   geom_line(aes(color="R^2 Future model", y=r_corr_f$r_squareds_f, x=c(5,11,22,33,44,55,66)))+
   scale_x_continuous(breaks=c(-66, -55, -44, -33, -22, -11, -5, 5,11,22,33,44,55,66))+
-  scale_y_continuous(limits = c(0.35, 0.95), breaks = seq(0.35, 0.95, by = 0.05), )+
-  scale_x_break(c(-5, 5))+
-  
+  scale_y_continuous(limits = c(0.35, 0.9), breaks = seq(0.35, 0.95, by = 0.05), )+
   ylab( expression(paste( R^{2},", correlation")))+
   xlab("Days in the volatility calculation")+
   theme_classic()+
   theme(panel.grid.major = element_line(size = 0.5, colour = "#EAEAEA"), 
-        legend.position = c(0.8,0.9), legend.title=element_blank())+
+        legend.position = c(0.85,0.9), legend.title=element_blank())+
   scale_color_manual(values = legend)
