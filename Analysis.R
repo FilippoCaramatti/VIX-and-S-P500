@@ -29,7 +29,11 @@ d=22
 sp500_sd_f <- na.omit(lag.xts(rollapply(sp500_lr, width = d, FUN = sd), 
                               k = - (d-1)))*sqrt(252)*100
 vix_f <- (vix[2:(n_vix-(d-1))])
-model_test1
+
+model_t<-lm(sp500_sd_f~vix_f)
+par(mfrow = c(2, 2))
+plot(model_t, pch = 20)
+
 resettest(sp500_sd_f~vix_f, power = 2:6 , type = "regressor")
 
 #transformation of vix
@@ -136,7 +140,7 @@ ggplot(r_corr_f)+
                 x=c(5,11,22,33,44,55,66)))+
   geom_line(aes(color="R^2", y=r_corr_f$r_squareds_f, x=c(5,11,22,33,44,55,66)))+
   scale_x_continuous(breaks=c(5,11,22,33,44,55,66))+
-  scale_y_continuous(limits = c(0.35, 0.85), breaks = seq(0.35, 0.85, by = 0.05))+
+  scale_y_continuous(limits = c(0.35, 0.80), breaks = seq(0.35, 0.85, by = 0.05))+
   ylab( expression(paste( R^{2},", correlation")))+
   xlab("Days in the volatility calculation")+
   theme_classic()+
@@ -229,14 +233,16 @@ legend <- c("Correlation Historical model"="red1", "R^2 Historical model"="royal
 
 ggplot(r_corr_h)+
   geom_line(aes(color="Correlation Historical model", y=r_corr_h$correlations_h,
-                x=c(5,11,22,33,44,55,66)))+
+                x=c(-5,-11,-22,-33,-44,-55,-66)))+
   geom_line(aes(color="R^2 Historical model", y=r_corr_h$r_squareds_h,
-                x=c(5,11,22,33,44,55,66)))+
+                x=c(-5,-11,-22,-33,-44,-55,-66)))+
   geom_line(aes(color="Correlation Future model", y=r_corr_f$correlations_f,
                 x=c(5,11,22,33,44,55,66)),)+
   geom_line(aes(color="R^2 Future model", y=r_corr_f$r_squareds_f, x=c(5,11,22,33,44,55,66)))+
-  scale_x_continuous(breaks=c(5,11,22,33,44,55,66))+
-  scale_y_continuous(limits = c(0.35, 0.95), breaks = seq(0.35, 0.95, by = 0.05))+
+  scale_x_continuous(breaks=c(-66, -55, -44, -33, -22, -11, -5, 5,11,22,33,44,55,66))+
+  scale_y_continuous(limits = c(0.35, 0.95), breaks = seq(0.35, 0.95, by = 0.05), )+
+  scale_x_break(c(-5, 5))+
+  
   ylab( expression(paste( R^{2},", correlation")))+
   xlab("Days in the volatility calculation")+
   theme_classic()+
